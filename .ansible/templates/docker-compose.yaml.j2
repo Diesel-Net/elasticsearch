@@ -1,0 +1,93 @@
+# docker-compose.yaml
+
+version: '3.8'
+services: 
+
+  # use the provided cli tool (elasticsearch-certutil) to generate self-signed certs
+  # https://www.elastic.co/guide/en/elasticsearch/reference/current/configuring-tls-docker.html
+  create_certs: 
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.2
+    command: >
+      bash -c '
+        if [[ ! -f /certs/bundle.zip ]]; then
+          bin/elasticsearch-certutil cert --silent --pem --in config/certificates/instances.yml -out /certs/bundle.zip;
+          unzip /certs/bundle.zip -d /certs; 
+        fi;
+        chown -R 1000:0 /certs
+      '
+    user: "0"
+    working_dir: /usr/share/elasticsearch
+    volumes:
+      - certs:/certs
+      - {{ config_dir }}/:/usr/share/elasticsearch/config/certificates/
+    deploy:
+      restart_policy:
+        # Note: this service is designed to run once with clean deployment and then die.
+        condition: none 
+
+
+{% for node in elastic_nodes %}
+
+  {{ node }}:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.2
+    volumes:
+      - certs:/usr/share/elasticsearch/config/certificates
+      - {{ data_dir }}/{{ node }}/:/usr/share/elasticsearch/data/
+    environment:
+      - node.name={{ node }}
+      - cluster.name=diesel-elastic
+      - discovery.seed_hosts={{ elastic_nodes | difference(node) | join(',') }}
+      - cluster.initial_master_nodes={{ elastic_nodes | join(',') }}
+      - bootstrap.memory_lock=false
+      - ES_JAVA_OPTS=-Xms3g -Xmx3g
+      - ELASTIC_PASSWORD={{ elastic_password }}
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certificates/{{ node }}/{{ node }}.key
+      - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
+      - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certificates/{{ node }}/{{ node }}.crt
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.verification_mode=certificate
+      - xpack.security.transport.ssl.certificate_authorities=/usr/share/elasticsearch/config/certificates/ca/ca.crt
+      - xpack.security.transport.ssl.certificate=/usr/share/elasticsearch/config/certificates/{{ node }}/{{ node }}.crt
+      - xpack.security.transport.ssl.key=/usr/share/elasticsearch/config/certificates/{{ node }}/{{ node }}.key
+    deploy:
+      mode: replicated
+      resources:
+          limits:
+            cpus: '2.0'
+            memory: 4G
+          reservations:
+            cpus: '1.0'
+            memory: 4G
+      labels:
+        - traefik.enable=true
+        - traefik.http.services.elasticsearch.loadbalancer.server.scheme=https
+        - traefik.http.services.elasticsearch.loadbalancer.server.port=9200
+        - traefik.http.services.elasticsearch.loadbalancer.serversTransport=elasticsearch@file
+        - traefik.http.routers.elasticsearch.rule=Host(`{{ domain }}`)
+    networks:
+      {{ docker_network }}:
+        aliases:
+          - {{ node }}
+    healthcheck:
+      test: >
+        curl 
+        --cacert /usr/share/elasticsearch/config/certificates/ca/ca.crt 
+        -s https://localhost:9200 >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+{% endfor %}
+
+
+volumes:
+  # volume created by the create_certs service
+  certs:
+
+
+networks:
+  {{ docker_network }}:
+    external:
+      name: {{ docker_network }}
