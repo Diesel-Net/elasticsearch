@@ -1,0 +1,7 @@
+elastic_nodes:
+  - es01
+  - es02
+  - es03
+
+# username: elastic (default)
+elastic_password: "{{ lookup('env', 'ELASTIC_PASSWORD') }}"

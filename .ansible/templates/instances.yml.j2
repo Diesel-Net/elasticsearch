@@ -1,0 +1,9 @@
+instances:
+{% for node in elastic_nodes %}
+  - name: {{ node }}
+    dns:
+      - {{ node }}
+      - localhost
+    ip:
+      - 127.0.0.1
+{% endfor %}
