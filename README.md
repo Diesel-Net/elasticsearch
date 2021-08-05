@@ -1,4 +1,4 @@
-[![Build Status](https://drone.diesel.net.net/api/badges/Diesel-Net/elasticsearch/status.svg)](https://drone.diesel.net.net/Diesel-Net/elasticsearch)
+[![Build Status](https://drone.kiwi-labs.net.net/api/badges/Diesel-Net/elasticsearch/status.svg)](https://drone.kiwi-labs.net.net/Diesel-Net/elasticsearch)
 
 # elasticsearch
 Elastic Search cluster automation for our EFK stack.
