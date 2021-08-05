@@ -66,6 +66,7 @@ services:
         - traefik.http.services.elasticsearch.loadbalancer.server.port=9200
         - traefik.http.services.elasticsearch.loadbalancer.serversTransport=elasticsearch@file
         - traefik.http.routers.elasticsearch.rule=Host(`{{ domain }}`)
+        - traefik.http.routers.elasticsearch.tls.certresolver=step-ca
     networks:
       {{ docker_network }}:
         aliases:
