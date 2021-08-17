@@ -6,7 +6,7 @@ services:
   # use the provided cli tool (elasticsearch-certutil) to generate self-signed certs
   # https://www.elastic.co/guide/en/elasticsearch/reference/current/configuring-tls-docker.html
   create_certs: 
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.2
+    image: elasticsearch:7.14.0
     command: >
       bash -c '
         if [[ ! -f /certs/bundle.zip ]]; then
@@ -29,7 +29,7 @@ services:
 {% for node in elastic_nodes %}
 
   {{ node }}:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.2
+    image: elasticsearch:7.14.0
     volumes:
       - certs:/usr/share/elasticsearch/config/certificates
       - {{ data_dir }}/{{ node }}/:/usr/share/elasticsearch/data/
