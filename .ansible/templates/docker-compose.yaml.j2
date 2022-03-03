@@ -53,13 +53,6 @@ services:
       - xpack.security.transport.ssl.key=/usr/share/elasticsearch/config/certificates/{{ node }}/{{ node }}.key
     deploy:
       mode: replicated
-      resources:
-          limits:
-            cpus: '2.0'
-            memory: 2G
-          reservations:
-            cpus: '1.0'
-            memory: 2G
       labels:
         - traefik.enable=true
         - traefik.http.services.elasticsearch.loadbalancer.server.scheme=https
