@@ -39,7 +39,7 @@ services:
       - discovery.seed_hosts={{ elastic_nodes | difference(node) | join(',') }}
       - cluster.initial_master_nodes={{ elastic_nodes | join(',') }}
       - bootstrap.memory_lock=false
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      #- ES_JAVA_OPTS=-Xms1g -Xmx1g
       - ELASTIC_PASSWORD={{ elastic_password }}
       - xpack.security.enabled=true
       - xpack.security.http.ssl.enabled=true
