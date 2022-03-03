@@ -1,6 +1,7 @@
 - hosts: elastic
   roles:
     - common
+    - traefik
 
   tasks:
 

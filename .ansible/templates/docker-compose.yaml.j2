@@ -68,7 +68,7 @@ services:
         - traefik.http.routers.elasticsearch.rule=Host(`{{ domain }}`)
         - traefik.http.routers.elasticsearch.tls.certresolver=step-ca
     networks:
-      {{ docker_network }}:
+      {{ traefik_network }}:
         aliases:
           - {{ node }}
     healthcheck:
@@ -89,6 +89,6 @@ volumes:
 
 
 networks:
-  {{ docker_network }}:
+  {{ traefik_network }}:
     external:
-      name: {{ docker_network }}
+      name: {{ traefik_network }}
