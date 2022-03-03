@@ -39,7 +39,7 @@ services:
       - discovery.seed_hosts={{ elastic_nodes | difference(node) | join(',') }}
       - cluster.initial_master_nodes={{ elastic_nodes | join(',') }}
       - bootstrap.memory_lock=false
-      #- ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
       - ELASTIC_PASSWORD={{ elastic_password }}
       - xpack.security.enabled=true
       - xpack.security.http.ssl.enabled=true
@@ -53,6 +53,13 @@ services:
       - xpack.security.transport.ssl.key=/usr/share/elasticsearch/config/certificates/{{ node }}/{{ node }}.key
     deploy:
       mode: replicated
+      resources:
+          limits:
+            cpus: '2.0'
+            memory: 1G
+          reservations:
+            cpus: '1.0'
+            memory: 1G
       labels:
         - traefik.enable=true
         - traefik.http.services.elasticsearch.loadbalancer.server.scheme=https
