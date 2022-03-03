@@ -11,4 +11,4 @@
 - name: traefik
   scm: git
   src: "git@github.com:Diesel-Net/ansible-role-traefik.git"
-  version: development
+  version: 1.0.0
